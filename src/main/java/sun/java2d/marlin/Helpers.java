@@ -548,10 +548,6 @@ final class Helpers implements MarlinConst {
             curveTypes = curveTypes_ref.putArray(curveTypes);
         }
 
-        boolean isEmpty() {
-            return (numCurves == 0);
-        }
-
         private void ensureSpace(final int n) {
             // use substraction to avoid integer overflow:
             if (curves.length - end < n) {

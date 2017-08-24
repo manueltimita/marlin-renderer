@@ -149,11 +149,6 @@ public final class MarlinProperties {
         return getBoolean("sun.java2d.renderer.clip", "true");
     }
 
-    // TODO: remove
-    public static boolean isDoClipCurves() {
-        return getBoolean("sun.java2d.renderer.clip.curves", "false");
-    }
-
     // debugging parameters
 
     public static boolean isDoStats() {

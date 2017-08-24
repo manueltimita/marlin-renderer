@@ -1084,8 +1084,6 @@ public final class MarlinRenderingEngine extends RenderingEngine
                 + MarlinConst.USE_SIMPLIFIER);
         logInfo("sun.java2d.renderer.clip             = "
                 + MarlinProperties.isDoClip());
-        logInfo("sun.java2d.renderer.clip.curves      = "
-                + MarlinProperties.isDoClipCurves());
 
         // debugging parameters
         logInfo("sun.java2d.renderer.doStats          = "

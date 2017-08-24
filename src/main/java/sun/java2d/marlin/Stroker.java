@@ -235,8 +235,8 @@ final class Stroker implements PathConsumer2D, MarlinConst {
     void dispose() {
         reverse.dispose();
 
+        opened   = false;
         capStart = false;
-        opened = false;
 
         if (DO_CLEAN_DIRTY) {
             // Force zero-fill dirty arrays:
@@ -515,7 +515,7 @@ final class Stroker implements PathConsumer2D, MarlinConst {
         this.sy0 = y0;
         this.sdx = 1.0f;
         this.sdy = 0.0f;
-        this.opened = false;
+        this.opened   = false;
         this.capStart = false;
 
         if (clipRect != null) {

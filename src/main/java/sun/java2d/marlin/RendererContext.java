@@ -78,10 +78,10 @@ final class RendererContext extends ReentrantContext implements IRendererContext
     int stroking = 0;
     // flag indicating to clip the shape
     boolean doClip = false;
-    // clip rectangle (ymin, ymax, xmin, xmax):
-    final float[] clipRect = new float[4];
     // flag indicating if the path is closed or not (in advance) to handle properly caps
     boolean closedPath = false;
+    // clip rectangle (ymin, ymax, xmin, xmax):
+    final float[] clipRect = new float[4];
 
     // Array caches:
     /* clean int[] cache (zero-filled) = 5 refs */

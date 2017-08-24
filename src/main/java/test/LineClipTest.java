@@ -38,7 +38,7 @@ import javax.imageio.ImageIO;
  */
 public class LineClipTest {
 
-    private final static int N = 1;
+    private final static int N = 20;
 
     static final int NUM_OFFSCREEN = 10000;
     static boolean OMIT_OFFSCREEN = false;

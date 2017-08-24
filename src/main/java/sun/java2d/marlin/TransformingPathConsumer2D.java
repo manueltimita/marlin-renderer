@@ -35,10 +35,10 @@ final class TransformingPathConsumer2D {
     private final RendererContext rdrCtx;
 
     // recycled ClosedPathDetector instance from detectClosedPath()
-    private final ClosedPathDetector cpDetector;
+    private final ClosedPathDetector   cpDetector;
 
     // recycled PathConsumer2D instance from wrapPath2d()
-    private final Path2DWrapper wp_Path2DWrapper = new Path2DWrapper();
+    private final Path2DWrapper        wp_Path2DWrapper        = new Path2DWrapper();
 
     // recycled PathConsumer2D instances from deltaTransformConsumer()
     private final DeltaScaleFilter     dt_DeltaScaleFilter     = new DeltaScaleFilter();
@@ -87,10 +87,10 @@ final class TransformingPathConsumer2D {
         if (at == null) {
             return out;
         }
-        float mxx = (float) at.getScaleX();
-        float mxy = (float) at.getShearX();
-        float myx = (float) at.getShearY();
-        float myy = (float) at.getScaleY();
+        final float mxx = (float) at.getScaleX();
+        final float mxy = (float) at.getShearX();
+        final float myx = (float) at.getShearY();
+        final float myy = (float) at.getScaleY();
 
         if (mxy == 0.0f && myx == 0.0f) {
             if (mxx == 1.0f && myy == 1.0f) {
@@ -99,74 +99,85 @@ final class TransformingPathConsumer2D {
                 // Scale only
                 if (rdrCtx.doClip) {
                     // adjust clip rectangle (ymin, ymax, xmin, xmax):
-                    final float[] _clipRect = rdrCtx.clipRect;
-                    _clipRect[0] += Renderer.RDR_OFFSET_Y;
-                    _clipRect[1] += Renderer.RDR_OFFSET_Y;
-                    _clipRect[2] += Renderer.RDR_OFFSET_X;
-                    _clipRect[3] += Renderer.RDR_OFFSET_X;
-
-                    // Adjust the clipping rectangle (inverseDeltaTransform):
-                    _clipRect[0] /= myy;
-                    _clipRect[1] /= myy;
-                    _clipRect[2] /= mxx;
-                    _clipRect[3] /= mxx;
+                    adjustClipScale(rdrCtx.clipRect, mxx, myy);
                 }
                 return dt_DeltaScaleFilter.init(out, mxx, myy);
             }
         } else {
             if (rdrCtx.doClip) {
                 // adjust clip rectangle (ymin, ymax, xmin, xmax):
-                final float[] _clipRect = rdrCtx.clipRect;
-                _clipRect[0] += Renderer.RDR_OFFSET_Y;
-                _clipRect[1] += Renderer.RDR_OFFSET_Y;
-                _clipRect[2] += Renderer.RDR_OFFSET_X;
-                _clipRect[3] += Renderer.RDR_OFFSET_X;
-
-                // Adjust the clipping rectangle (inverseDeltaTransform):
-                final float det = mxx * myy - mxy * myx;
-                final float imxx = myy / det;
-                final float imxy = -mxy / det;
-                final float imyx = -myx / det;
-                final float imyy = mxx / det;
-
-                float xmin, xmax, ymin, ymax;
-                float x, y;
-                // xmin, ymin:
-                x = _clipRect[2] * imxx + _clipRect[0] * imxy;
-                y = _clipRect[2] * imyx + _clipRect[0] * imyy;
-
-                xmin = xmax = x;
-                ymin = ymax = y;
-
-                // xmax, ymin:
-                x = _clipRect[3] * imxx + _clipRect[0] * imxy;
-                y = _clipRect[3] * imyx + _clipRect[0] * imyy;
-
-                if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
-                if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
-
-                // xmin, ymax:
-                x = _clipRect[2] * imxx + _clipRect[1] * imxy;
-                y = _clipRect[2] * imyx + _clipRect[1] * imyy;
-
-                if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
-                if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
-
-                // xmax, ymax:
-                x = _clipRect[3] * imxx + _clipRect[1] * imxy;
-                y = _clipRect[3] * imyx + _clipRect[1] * imyy;
-
-                if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
-                if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
-
-                _clipRect[0] = ymin;
-                _clipRect[1] = ymax;
-                _clipRect[2] = xmin;
-                _clipRect[3] = xmax;
-//                System.out.println("clip: "+java.util.Arrays.toString(_clipRect));
+                adjustClipInverseDelta(rdrCtx.clipRect, mxx, mxy, myx, myy);
             }
             return dt_DeltaTransformFilter.init(out, mxx, mxy, myx, myy);
         }
+    }
+
+    private static void adjustClipOffset(final float[] clipRect) {
+        clipRect[0] += Renderer.RDR_OFFSET_Y;
+        clipRect[1] += Renderer.RDR_OFFSET_Y;
+        clipRect[2] += Renderer.RDR_OFFSET_X;
+        clipRect[3] += Renderer.RDR_OFFSET_X;
+    }
+
+    private static void adjustClipScale(final float[] clipRect,
+                                        final float mxx, final float myy)
+    {
+        adjustClipOffset(clipRect);
+
+        // Adjust the clipping rectangle (iv_DeltaScaleFilter):
+        clipRect[0] /= myy;
+        clipRect[1] /= myy;
+        clipRect[2] /= mxx;
+        clipRect[3] /= mxx;
+    }
+
+    private static void adjustClipInverseDelta(final float[] clipRect,
+                                               final float mxx, final float mxy,
+                                               final float myx, final float myy)
+    {
+        adjustClipOffset(clipRect);
+
+        // Adjust the clipping rectangle (iv_DeltaTransformFilter):
+        final float det = mxx * myy - mxy * myx;
+        final float imxx =  myy / det;
+        final float imxy = -mxy / det;
+        final float imyx = -myx / det;
+        final float imyy =  mxx / det;
+
+        float xmin, xmax, ymin, ymax;
+        float x, y;
+        // xmin, ymin:
+        x = clipRect[2] * imxx + clipRect[0] * imxy;
+        y = clipRect[2] * imyx + clipRect[0] * imyy;
+
+        xmin = xmax = x;
+        ymin = ymax = y;
+
+        // xmax, ymin:
+        x = clipRect[3] * imxx + clipRect[0] * imxy;
+        y = clipRect[3] * imyx + clipRect[0] * imyy;
+
+        if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
+        if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
+
+        // xmin, ymax:
+        x = clipRect[2] * imxx + clipRect[1] * imxy;
+        y = clipRect[2] * imyx + clipRect[1] * imyy;
+
+        if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
+        if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
+
+        // xmax, ymax:
+        x = clipRect[3] * imxx + clipRect[1] * imxy;
+        y = clipRect[3] * imyx + clipRect[1] * imyy;
+
+        if (x < xmin) { xmin = x; } else if (x > xmax) { xmax = x; }
+        if (y < ymin) { ymin = y; } else if (y > ymax) { ymax = y; }
+
+        clipRect[0] = ymin;
+        clipRect[1] = ymax;
+        clipRect[2] = xmin;
+        clipRect[3] = xmax;
     }
 
     PathConsumer2D inverseDeltaTransformConsumer(PathConsumer2D out,
