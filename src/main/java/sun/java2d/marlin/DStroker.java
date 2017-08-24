@@ -1185,9 +1185,9 @@ final class DStroker implements DPathConsumer2D, MarlinConst {
             numCurves = 0;
 
             if (DO_STATS) {
-                rdrCtx.stats.stat_rdr_poly_stack_types.add(curveTypesUseMark);
-                rdrCtx.stats.stat_rdr_poly_stack_curves.add(curvesUseMark);
-                rdrCtx.stats.hist_rdr_poly_stack_curves.add(curvesUseMark);
+                rdrCtx.stats.stat_str_polystack_types.add(curveTypesUseMark);
+                rdrCtx.stats.stat_str_polystack_curves.add(curvesUseMark);
+                rdrCtx.stats.hist_str_polystack_curves.add(curvesUseMark);
 
                 // reset marks
                 curveTypesUseMark = 0;
@@ -1204,14 +1204,14 @@ final class DStroker implements DPathConsumer2D, MarlinConst {
             // use substraction to avoid integer overflow:
             if (curves.length - end < n) {
                 if (DO_STATS) {
-                    rdrCtx.stats.stat_array_stroker_polystack_curves
+                    rdrCtx.stats.stat_array_str_polystack_curves
                         .add(end + n);
                 }
                 curves = curves_ref.widenArray(curves, end, end + n);
             }
             if (curveTypes.length <= numCurves) {
                 if (DO_STATS) {
-                    rdrCtx.stats.stat_array_stroker_polystack_curveTypes
+                    rdrCtx.stats.stat_array_str_polystack_types
                         .add(numCurves + 1);
                 }
                 curveTypes = curveTypes_ref.widenArray(curveTypes,

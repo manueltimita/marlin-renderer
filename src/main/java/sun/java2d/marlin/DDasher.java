@@ -255,7 +255,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         final int index = off + type;
         final double x = pts[index - 4];
         final double y = pts[index - 3];
-        
+
         if (on) {
             if (starting) {
                 goTo_starting(pts, off, type);
@@ -281,7 +281,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         int len = type - 1; // - 2 + 1
         int segIdx = firstSegidx;
         double[] buf = firstSegmentsBuffer;
-        
+
         if (segIdx + len  > buf.length) {
             if (DO_STATS) {
                 rdrCtx.stats.stat_array_dasher_firstSegmentsBuffer
@@ -321,7 +321,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         int _idx = idx;
         boolean _dashOn = dashOn;
         double _phase = phase;
-        
+
         double leftInThisDashSegment;
         double d, dashdx, dashdy, p;
 
@@ -332,19 +332,19 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             if (len <= leftInThisDashSegment) {
                 _curCurvepts[0] = x1;
                 _curCurvepts[1] = y1;
-                
+
                 goTo(_curCurvepts, 0, 4, _dashOn);
 
                 // Advance phase within current dash segment
                 _phase += len;
-                
+
                 // TODO: compare double values using epsilon:
                 if (len == leftInThisDashSegment) {
                     _phase = 0.0d;
                     _idx = (_idx + 1) % _dashLen;
                     _dashOn = !_dashOn;
                 }
-                
+
                 // Save local state:
                 idx = _idx;
                 dashOn = _dashOn;
@@ -364,7 +364,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             } else {
                 // may avoid divide by precomputation
                 // TODO: out of loop if nb(seg) >> dashLen
-                p = leftInThisDashSegment / d; 
+                p = leftInThisDashSegment / d;
 
                 _curCurvepts[0] = x0 + p * dashdx;
                 _curCurvepts[1] = y0 + p * dashdy;
@@ -373,7 +373,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             goTo(_curCurvepts, 0, 4, _dashOn);
 
             len -= leftInThisDashSegment;
-            
+
             // Advance to next dash segment
             _idx = (_idx + 1) % _dashLen;
             _dashOn = !_dashOn;
@@ -394,13 +394,13 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         final double[] _curCurvepts = curCurvepts;
         final double[] _dash = dash;
         final int _dashLen = this.dashLen;
-        
+
         _li.initializeIterationOnCurve(_curCurvepts, type);
 
         int _idx = idx;
         boolean _dashOn = dashOn;
         double _phase = phase;
-        
+
         // initially the current curve is at curCurvepts[0...type]
         int curCurveoff = 0;
         double lastSplitT = 0.0d;
@@ -423,9 +423,9 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             _phase = 0.0d;
             leftInThisDashSegment = _dash[_idx];
         }
-        
+
         goTo(_curCurvepts, curCurveoff+2, type, _dashOn);
-       
+
         _phase += _li.lastSegLen();
         if (_phase >= _dash[_idx]) {
             _phase = 0.0d;

@@ -27,8 +27,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -36,30 +34,18 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * Simple Line rendering test using GeneralPath to enable Pisces / marlin /
- * ductus renderers
+ * Simple Line Clipping rendering test
  */
-public class StrokeClipTest {
+public class LineClipTest {
 
     private final static int N = 1;
 
-    private final static boolean DO_CLOSE_PATH = true;
-
-    private final static boolean DO_CIRCLE = false;
-
-    private final static boolean DO_FILL = false;
-    private final static boolean DO_DRAW = true;
-
-    private final static float CIRCLE_RADIUS = 100f;
-
-    private final static float RECT_SIZE = 100f;
-
-    private final static double sqrt2 = Math.sqrt(2);
+    static final int NUM_OFFSCREEN = 10000;
+    static boolean OMIT_OFFSCREEN = false;
 
     public static void main(String[] args) {
 
-        final float lineStroke = 4f;
-        final int size = 400;
+        final int size = 200;
 
         // First display which renderer is tested:
         // JDK9 only:
@@ -70,7 +56,8 @@ public class StrokeClipTest {
         try {
             renderer = sun.java2d.pipe.RenderingEngine.getInstance().getClass().getName();
             System.out.println(renderer);
-        } catch (Throwable th) {
+        }
+        catch (Throwable th) {
             // may fail with JDK9 jigsaw (jake)
             if (false) {
                 System.err.println("Unable to get RenderingEngine.getInstance()");
@@ -78,7 +65,7 @@ public class StrokeClipTest {
             }
         }
 
-        System.out.println("StrokeClipTest: size = " + size);
+        System.out.println("LineClipTest: size = " + size);
 
         final BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 
@@ -88,17 +75,19 @@ public class StrokeClipTest {
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
         g2d.setClip(0, 0, size, size);
-        g2d.setStroke(
-                new BasicStroke(lineStroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 20f)
-        );
+        g2d.setStroke( new BasicStroke(1f) );
+//        g2d.setStroke( new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER) );
 
         g2d.setBackground(Color.WHITE);
         g2d.clearRect(0, 0, size, size);
 
+        g2d.setColor(Color.BLUE);
+        final Shape path = createPath(size);
+
         for (int i = 0; i < N; i++) {
             final long start = System.nanoTime();
 
-            paint(g2d, size);
+            g2d.draw(path);
 
             final long time = System.nanoTime() - start;
 
@@ -106,63 +95,37 @@ public class StrokeClipTest {
         }
 
         try {
-            final File file = new File("StrokeClipTest-"
-                    + (DO_CIRCLE ? "circle" : "rect") + ".png");
+            final File file = new File("LineClipTest-"
+            + (OMIT_OFFSCREEN ? "-noOffscreen" : "") + ".png");
 
             System.out.println("Writing file: " + file.getAbsolutePath());
             ImageIO.write(image, "PNG", file);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             ex.printStackTrace();
-        } finally {
+        }
+        finally {
             g2d.dispose();
         }
     }
 
-    private static void paint(final Graphics2D g2d, final float size) {
-        final AffineTransform tx = g2d.getTransform();
-        final Shape path = createPath(size);
-
-        for (int i = 500; i < 600; i += 1500) {
-            g2d.setTransform(AffineTransform.getTranslateInstance(i - 10000, 0));
-
-            if (DO_FILL) {
-                g2d.setColor(Color.BLUE);
-                g2d.fill(path);
-            }
-
-            if (DO_DRAW) {
-                g2d.setColor(Color.RED);
-                g2d.draw(path);
-            }
-        }
-        g2d.setTransform(tx);
-    }
-
     private static Shape createPath(final float size) {
-        if (DO_CIRCLE) {
-            final float c = (float) (0.5f * size - CIRCLE_RADIUS / sqrt2);
+        final Path2D p = new Path2D.Float();
 
-            return new Ellipse2D.Float(
-                    -CIRCLE_RADIUS,
-                    100,
-                    2.0f * CIRCLE_RADIUS,
-                    2.0f * CIRCLE_RADIUS
-            );
-
+        if (OMIT_OFFSCREEN) {
+            p.moveTo(-100, 100);
         } else {
-            final Path2D p = new Path2D.Float();
-            p.moveTo(100, 100);
-            p.lineTo(100.0, 50);
-            p.lineTo(-100, 10);
-            p.lineTo(-100, 100);
-            p.lineTo(300.0, 200);
-            p.lineTo(100, 300);
-            p.lineTo(120, 80);
+            p.moveTo(-500, 100);
 
-            if (DO_CLOSE_PATH) {
-                p.closePath();
+            for (int i = 0; i < NUM_OFFSCREEN; i++) {
+                double x = Math.random() * 400 - 500;
+                double y = Math.random() * 200;
+                p.lineTo(x, y);
             }
-            return p;
+            p.lineTo(-100, 100);
         }
+        p.lineTo(50, 150);
+        p.lineTo(150, 50);
+        return p;
     }
 }

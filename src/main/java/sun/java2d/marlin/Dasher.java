@@ -169,7 +169,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
         this.firstSegidx = 0;
 
         this.recycleDashes = recycleDashes;
-        
+
 //        System.out.println("dashTotal: "+dashTotal);
 
         return this; // fluent API
@@ -263,7 +263,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
         final int index = off + type;
         final float x = pts[index - 4];
         final float y = pts[index - 3];
-        
+
         if (on) {
             if (starting) {
                 goTo_starting(pts, off, type);
@@ -289,7 +289,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
         int len = type - 1; // - 2 + 1
         int segIdx = firstSegidx;
         float[] buf = firstSegmentsBuffer;
-        
+
         if (segIdx + len  > buf.length) {
             if (DO_STATS) {
                 rdrCtx.stats.stat_array_dasher_firstSegmentsBuffer
@@ -307,7 +307,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
     }
 
     private final static boolean USE_NAIVE_SUM = false;
-    
+
     @Override
     public void lineTo(float x1, float y1) {
         final float dx = x1 - x0;
@@ -323,7 +323,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
         len = (float) Math.sqrt(len);
         final float cx = dx / len;
         final float cy = dy / len;
-        
+
         final float dcx = Math.ulp(cx);
         final float dcy = Math.ulp(cy);
 /*
@@ -340,7 +340,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
 
         float leftInThisDashSegment;
         float el = 0.0f, ex = 0.0f, ey = 0.0f;
-        
+
         float d, x, y, dashdx, dashdy, p;
         float z, t;
 
@@ -352,19 +352,19 @@ final class Dasher implements PathConsumer2D, MarlinConst {
             if (len <= leftInThisDashSegment) {
                 _curCurvepts[0] = x1;
                 _curCurvepts[1] = y1;
-                
+
                 goTo(_curCurvepts, 0, 4, _dashOn);
 
                 // Advance phase within current dash segment
                 _phase += len;
-                
+
                 // TODO: compare float values using epsilon:
                 if (len == leftInThisDashSegment) {
                     _phase = 0.0f;
                     _idx = (_idx + 1) % _dashLen;
                     _dashOn = !_dashOn;
                 }
-                
+
                 // Save local state:
                 idx = _idx;
                 dashOn = _dashOn;
@@ -376,7 +376,7 @@ final class Dasher implements PathConsumer2D, MarlinConst {
             // may avoid multiply by precomputation
             dashdx = d * cx;
             dashdy = d * cy;
-            
+
             // Numeric precision problem: d << (x0,y0)
             x = this.x0;
             y = this.y0;
@@ -387,7 +387,7 @@ if (USE_NAIVE_SUM) {
                 // naive sum:
                 _curCurvepts[0] = x + dashdx;
                 _curCurvepts[1] = y + dashdy;
-} else {            
+} else {
                 // kahan sum:
                 z = dashdx - ex;
                 t = x + z;
@@ -401,19 +401,19 @@ if (USE_NAIVE_SUM) {
                 ey = (t - y) - z - dcy;
                 _curCurvepts[1] = t;
 //                System.out.println("z: "+z + " t: "+t + " e: "+ey);
-}            
+}
             } else {
 //                System.out.println("phase != 0 at: "+len);
-                
+
                 // may avoid divide by precomputation
                 // TODO: out of loop if nb(seg) >> dashLen
-                p = leftInThisDashSegment / d; 
-                
+                p = leftInThisDashSegment / d;
+
 if (USE_NAIVE_SUM) {
                 // naive sum:
                 _curCurvepts[0] = x + p * dashdx;
                 _curCurvepts[1] = y + p * dashdy;
-} else {            
+} else {
                 // kahan sum:
                 z = (p * dashdx) - ex;
                 t = x + z;
@@ -427,7 +427,7 @@ if (USE_NAIVE_SUM) {
                 ey = (t - y) - z - dcy;
                 _curCurvepts[1] = t;
 //                System.out.println("z: "+z + " t: "+t + " e: "+ey);
-}            
+}
             }
 
             goTo(_curCurvepts, 0, 4, _dashOn);
@@ -435,8 +435,8 @@ if (USE_NAIVE_SUM) {
 if (USE_NAIVE_SUM) {
             // naive sum:
             len -= leftInThisDashSegment;
-} else {            
-            // Very high dynamic: (len / dashTotal) > 4million    
+} else {
+            // Very high dynamic: (len / dashTotal) > 4million
             // TODO: find the proper threshold with accuracy ie dynamic range is larger than float precision !
             // see ulps ! ie smallest dash length vs line length ~ 5e6 ?
 
@@ -446,18 +446,18 @@ if (USE_NAIVE_SUM) {
             el = (len - t) - z;
             len = t;
 //            System.out.println("z: "+z + " t: "+t + " e: "+el);
-}            
+}
 
             // Advance to next dash segment
             _idx = (_idx + 1) % _dashLen;
             _dashOn = !_dashOn;
             _phase = 0.0f;
         }
-    }    
-    
+    }
+
     // shared instance in Dasher
     private final LengthIterator li = new LengthIterator();
-    
+
     private final float[] initCurvepts = new float[8];
 
     // preconditions: curCurvepts must be an array of length at least 2 * type,
@@ -470,7 +470,7 @@ if (USE_NAIVE_SUM) {
         final float[] _curCurvepts = curCurvepts;
         final float[] _dash = dash;
         final int _dashLen = this.dashLen;
-        
+
         if (true) {
             // backup (lolo):
             // optimize arraycopy (8 values faster than 6 = type):
@@ -482,7 +482,7 @@ if (USE_NAIVE_SUM) {
         int _idx = idx;
         boolean _dashOn = dashOn;
         float _phase = phase;
-        
+
         // initially the current curve is at curCurvepts[0...type]
         int curCurveoff = 0; // type
         float lastSplitT = 0.0f;
@@ -491,11 +491,11 @@ if (USE_NAIVE_SUM) {
 
 //        int n = 0;
         int c = 0;
-        
+
         while ((t = _li.next(leftInThisDashSegment)) < 1.0f) {
-/*            
+/*
             if (t != 0.0f && _dashOn) {
-                // special case next 2 lines for prevt=0 and t=1                
+                // special case next 2 lines for prevt=0 and t=1
 //                left,right = subdivide curve at prevt
                 Helpers.subdivideAt(lastSplitT,
                                     initCurvepts, 0,
@@ -533,7 +533,7 @@ if (USE_NAIVE_SUM) {
             _dashOn = !_dashOn;
             _phase = 0.0f;
             leftInThisDashSegment = _dash[_idx];
-            
+
             if (true) {
                 if ((++c) == 10000) {
                     // Split from initial curve:
@@ -546,11 +546,11 @@ if (USE_NAIVE_SUM) {
             }
 //            n++;
         }
-        
+
 //        System.out.println("somethingTo("+type+") : "+n+" iterations.");
-        
+
         goTo(_curCurvepts, curCurveoff + 2, type, _dashOn);
-        
+
         _phase += _li.lastSegLen();
         if (_phase >= _dash[_idx]) {
             _phase = 0.0f;

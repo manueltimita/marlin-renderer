@@ -77,11 +77,11 @@ final class RendererContext extends ReentrantContext implements IRendererContext
     // flag indicating the shape is stroked (1) or filled (0)
     int stroking = 0;
     // flag indicating to clip the shape
-    int doClip = 0;
+    boolean doClip = false;
     // clip rectangle (ymin, ymax, xmin, xmax):
     final float[] clipRect = new float[4];
     // flag indicating if the path is closed or not (in advance) to handle properly caps
-    int closedPath = 0;
+    boolean closedPath = false;
 
     // Array caches:
     /* clean int[] cache (zero-filled) = 5 refs */
@@ -146,9 +146,9 @@ final class RendererContext extends ReentrantContext implements IRendererContext
             stats.totalOffHeap = 0L;
         }
         stroking   = 0;
-        doClip     = 0;
-        closedPath = 0;
-        
+        doClip     = false;
+        closedPath = false;
+
         // if context is maked as DIRTY:
         if (dirty) {
             // may happen if an exception if thrown in the pipeline processing:

@@ -42,9 +42,10 @@ public class ShapeOutlineTest {
 
     private final static int N = 10;
 
-    private final static boolean DO_CIRCLE = false;
-
+    private final static boolean DO_FILL = false;
     private final static boolean DO_DRAW = true;
+
+    private final static boolean DO_CIRCLE = false;
 
     private final static float CIRCLE_RADIUS = 1843200.0f * 10.0f;
 
@@ -100,11 +101,11 @@ public class ShapeOutlineTest {
         // with inlined variables: old = 3770 ms
         // Ductus 1.8: 35934.7 ms
         // DMarlinRenderingEngine: 4131.276773 ms.
-        
+
         // CIRCLE:
         // old: 2696.341058 ms.
         // fix: 2442.098762 ms.
-        
+
         // CPU fixed without clipping:  4357.567511 ms.
         // Stroker clipping: 700 ms.
 
@@ -136,8 +137,10 @@ public class ShapeOutlineTest {
     private static void paint(final Graphics2D g2d, final float size) {
         final Shape path = createPath(size);
 
-        g2d.setColor(Color.BLUE);
-        g2d.fill(path);
+        if (DO_FILL) {
+            g2d.setColor(Color.BLUE);
+            g2d.fill(path);
+        }
 
         if (DO_DRAW) {
             g2d.setColor(Color.RED);

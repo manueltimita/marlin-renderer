@@ -33,6 +33,8 @@ import static java.lang.Math.acos;
 import java.util.Arrays;
 import sun.awt.geom.PathConsumer2D;
 import static sun.java2d.marlin.MarlinConst.INITIAL_EDGES_COUNT;
+import sun.java2d.marlin.stats.Histogram;
+import sun.java2d.marlin.stats.StatLong;
 
 final class Helpers implements MarlinConst {
 
@@ -434,13 +436,13 @@ final class Helpers implements MarlinConst {
     }
 
     // From sun.java2d.loops.GeneralRenderer:
-    
+
     static final int OUTCODE_TOP     = 1;
     static final int OUTCODE_BOTTOM  = 2;
     static final int OUTCODE_LEFT    = 4;
     static final int OUTCODE_RIGHT   = 8;
-    
-    static int outcode(final float x, final float y, 
+
+    static int outcode(final float x, final float y,
                        final float[] clipRect)
     {
         int code;
@@ -477,9 +479,6 @@ final class Helpers implements MarlinConst {
         byte[] curveTypes;
         int numCurves;
 
-        // per-thread renderer context
-        final RendererContext rdrCtx;
-
         // curves ref (dirty)
         final FloatArrayCache.Reference curves_ref;
         // curveTypes ref (dirty)
@@ -489,13 +488,23 @@ final class Helpers implements MarlinConst {
         int curveTypesUseMark;
         int curvesUseMark;
 
-        /**
-         * Constructor
-         * @param rdrCtx per-thread renderer context
-         */
-        PolyStack(final RendererContext rdrCtx) {
-            this.rdrCtx = rdrCtx;
+        private final StatLong stat_polystack_types;
+        private final StatLong stat_polystack_curves;
+        private final Histogram hist_polystack_curves;
+        private final StatLong stat_array_polystack_curves;
+        private final StatLong stat_array_polystack_curveTypes;
 
+       PolyStack(final RendererContext rdrCtx) {
+           this(rdrCtx, null, null, null, null, null);
+       }
+
+       PolyStack(final RendererContext rdrCtx,
+                 final StatLong stat_polystack_types,
+                 final StatLong stat_polystack_curves,
+                 final Histogram hist_polystack_curves,
+                 final StatLong stat_array_polystack_curves,
+                 final StatLong stat_array_polystack_curveTypes)
+       {
             curves_ref = rdrCtx.newDirtyFloatArrayRef(INITIAL_CURVES_COUNT); // 32K
             curves     = curves_ref.initial;
 
@@ -508,6 +517,11 @@ final class Helpers implements MarlinConst {
                 curveTypesUseMark = 0;
                 curvesUseMark = 0;
             }
+            this.stat_polystack_types = stat_polystack_types;
+            this.stat_polystack_curves = stat_polystack_curves;
+            this.hist_polystack_curves = hist_polystack_curves;
+            this.stat_array_polystack_curves = stat_array_polystack_curves;
+            this.stat_array_polystack_curveTypes = stat_array_polystack_curveTypes;
         }
 
         /**
@@ -519,9 +533,9 @@ final class Helpers implements MarlinConst {
             numCurves = 0;
 
             if (DO_STATS) {
-                rdrCtx.stats.stat_rdr_poly_stack_types.add(curveTypesUseMark);
-                rdrCtx.stats.stat_rdr_poly_stack_curves.add(curvesUseMark);
-                rdrCtx.stats.hist_rdr_poly_stack_curves.add(curvesUseMark);
+                stat_polystack_types.add(curveTypesUseMark);
+                stat_polystack_curves.add(curvesUseMark);
+                hist_polystack_curves.add(curvesUseMark);
 
                 // reset marks
                 curveTypesUseMark = 0;
@@ -533,7 +547,7 @@ final class Helpers implements MarlinConst {
             curves     = curves_ref.putArray(curves);
             curveTypes = curveTypes_ref.putArray(curveTypes);
         }
-        
+
         boolean isEmpty() {
             return (numCurves == 0);
         }
@@ -542,15 +556,13 @@ final class Helpers implements MarlinConst {
             // use substraction to avoid integer overflow:
             if (curves.length - end < n) {
                 if (DO_STATS) {
-                    rdrCtx.stats.stat_array_stroker_polystack_curves
-                        .add(end + n);
+                    stat_array_polystack_curves.add(end + n);
                 }
                 curves = curves_ref.widenArray(curves, end, end + n);
             }
             if (curveTypes.length <= numCurves) {
                 if (DO_STATS) {
-                    rdrCtx.stats.stat_array_stroker_polystack_curveTypes
-                        .add(numCurves + 1);
+                    stat_array_polystack_curveTypes.add(numCurves + 1);
                 }
                 curveTypes = curveTypes_ref.widenArray(curveTypes,
                                                        numCurves,
@@ -591,7 +603,11 @@ final class Helpers implements MarlinConst {
             curves[end++] = x;    curves[end++] = y;
         }
 
-        void pullAll(PathConsumer2D io) {
+        void pullAll(final PathConsumer2D io) {
+            final int nc = numCurves;
+            if (nc == 0) {
+                return;
+            }
             if (DO_STATS) {
                 // update used marks:
                 if (numCurves > curveTypesUseMark) {
@@ -603,7 +619,6 @@ final class Helpers implements MarlinConst {
             }
             final byte[]  _curveTypes = curveTypes;
             final float[] _curves = curves;
-            final int nc = numCurves;
             int e = 0;
 
             for (int i = 0; i < nc; i++) {
@@ -630,7 +645,11 @@ final class Helpers implements MarlinConst {
             end = 0;
         }
 
-        void popAll(PathConsumer2D io) {
+        void popAll(final PathConsumer2D io) {
+            int nc = numCurves;
+            if (nc == 0) {
+                return;
+            }
             if (DO_STATS) {
                 // update used marks:
                 if (numCurves > curveTypesUseMark) {
@@ -642,7 +661,6 @@ final class Helpers implements MarlinConst {
             }
             final byte[]  _curveTypes = curveTypes;
             final float[] _curves = curves;
-            int nc = numCurves;
             int e  = end;
 
             while (nc != 0) {

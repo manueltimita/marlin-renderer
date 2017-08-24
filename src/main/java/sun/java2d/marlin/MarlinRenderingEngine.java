@@ -84,7 +84,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
 
     static final float UPPER_BND = Float.MAX_VALUE / 2.0f;
     static final float LOWER_BND = -UPPER_BND;
-    
+
     static final boolean DO_CLIP = MarlinProperties.isDoClip();
     static final boolean DO_TRACE = false;
 
@@ -399,7 +399,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
         }
 
         final TransformingPathConsumer2D transformerPC2D = rdrCtx.transformerPC2D;
-        
+
         if (DO_TRACE) {
             // trace Stroker:
             pc2d = transformerPC2D.traceStroker(pc2d);
@@ -410,10 +410,10 @@ public final class MarlinRenderingEngine extends RenderingEngine
             // to remove collinear segments (notably due to cap square)
             pc2d = rdrCtx.simplifier.init(pc2d);
         }
-        
+
         // deltaTransformConsumer may adjust the clip rectangle:
         pc2d = transformerPC2D.deltaTransformConsumer(pc2d, strokerat);
-        
+
         // stroker will adjust the clip rectangle (width / miter limit):
         pc2d = rdrCtx.stroker.init(pc2d, width, caps, join, miterlimit, scale);
 
@@ -423,7 +423,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
             }
             pc2d = rdrCtx.dasher.init(pc2d, dashes, dashLen, dashphase,
                                       recycleDashes);
-        } else if ((rdrCtx.doClip == 1) && (caps != Stroker.CAP_BUTT)) {
+        } else if (rdrCtx.doClip && (caps != Stroker.CAP_BUTT)) {
             if (DO_TRACE) {
                 pc2d = transformerPC2D.traceClosedPathDetector(pc2d);
             }
@@ -438,7 +438,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
             // trace Input:
             pc2d = transformerPC2D.traceInput(pc2d);
         }
-        
+
         final PathIterator pi = norm.getNormalizingPathIterator(rdrCtx,
                                          src.getPathIterator(at));
 
@@ -827,7 +827,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
                 r = rdrCtx.renderer.init(clip.getLoX(), clip.getLoY(),
                                          clip.getWidth(), clip.getHeight(),
                                          PathIterator.WIND_NON_ZERO);
-                
+
                 if (DO_CLIP) {
                     // Define the initial clip bounds:
                     final float[] clipRect = rdrCtx.clipRect;
@@ -837,7 +837,7 @@ public final class MarlinRenderingEngine extends RenderingEngine
                     clipRect[3] = clip.getLoX() + clip.getWidth();
 
                     // Enable clipping:
-                    rdrCtx.doClip = 1;
+                    rdrCtx.doClip = true;
                 }
 
                 strokeTo(rdrCtx, s, _at, bs, thin, norm, true, r);

@@ -49,10 +49,10 @@ final class Renderer implements PathConsumer2D, MarlinRenderer {
     static final float SUBPIXEL_SCALE_Y = (float) SUBPIXEL_POSITIONS_Y;
     static final int SUBPIXEL_MASK_X = SUBPIXEL_POSITIONS_X - 1;
     static final int SUBPIXEL_MASK_Y = SUBPIXEL_POSITIONS_Y - 1;
-    
+
     static final float RDR_OFFSET_X = 0.501f / SUBPIXEL_POSITIONS_X;
     static final float RDR_OFFSET_Y = 0.501f / SUBPIXEL_POSITIONS_Y;
-    
+
 
     // number of subpixels corresponding to a tile line
     private static final int SUBPIXEL_TILE
@@ -236,7 +236,7 @@ final class Renderer implements PathConsumer2D, MarlinRenderer {
     }
 
     private final static boolean USE_NAIVE_SUM = false;
-    
+
     // x0, y0 and x3,y3 are the endpoints of the curve. We could compute these
     // using c.xat(0),c.yat(0) and c.xat(1),c.yat(1), but this might introduce
     // numerical errors, and our callers already have the exact values.
@@ -270,7 +270,7 @@ final class Renderer implements PathConsumer2D, MarlinRenderer {
 
         float z, t;
         float ex = 0.0f, ey = 0.0f;
-        
+
         while (count > 0) {
             // divide step by half:
             while (Math.abs(ddx) + Math.abs(ddy) >= _DEC_BND) {
@@ -329,7 +329,7 @@ if (USE_NAIVE_SUM) {
                 // error are small enough:
                 dy += ddy;
                 ddy += dddy;
-}                
+}
             } else {
                 x1 = x3;
                 y1 = y3;
@@ -341,10 +341,10 @@ if (USE_NAIVE_SUM) {
             x0 = x1;
             y0 = y1;
         }
-/*        
+/*
         System.out.println("Iterations : "+n);
         System.out.println("Errors x/y    : "+ex+" , "+ey);
-*/        
+*/
         if (DO_STATS) {
             rdrCtx.stats.stat_rdr_curveBreak.add(nL);
         }
