@@ -74,8 +74,12 @@ final class Stroker implements PathConsumer2D, MarlinConst {
     // it to floating point, so that's why the divisions by 2^16 are there.
     private static final float ROUND_JOIN_THRESHOLD = 1000.0f/65536.0f;
 
-    private static final float C = 0.5522847498307933f;
+    // kappa = (4/3) * (SQRT(2) - 1)
+    private static final float C = (float)(4.0d * (Math.sqrt(2.0d) - 1.0d) / 3.0d);
 
+    // SQRT(2)
+    private static final float SQRT_2 = (float)Math.sqrt(2.0d);
+    
     private static final int MAX_N_CURVES = 11;
 
     private PathConsumer2D out;
@@ -193,10 +197,8 @@ final class Stroker implements PathConsumer2D, MarlinConst {
         if (rdrCtx.doClip) {
             // Adjust the clipping rectangle with the stroker margin (miter limit, width)
 
-            // round joins / caps:
-            final float widthLimit =
-                ((joinStyle == JOIN_ROUND) || (capStyle == CAP_ROUND)) ? C * lineWidth // why 0.55 ?
-                : lineWidth2;
+            // for square caps:
+            final float widthLimit = (capStyle == CAP_SQUARE) ? SQRT_2 * lineWidth2 : lineWidth2;
 
             float boundsMargin;
             if (joinStyle == JOIN_MITER) {
@@ -219,8 +221,6 @@ final class Stroker implements PathConsumer2D, MarlinConst {
             _clipRect[1] += boundsMargin + rdrOffY;
             _clipRect[2] -= boundsMargin - rdrOffX;
             _clipRect[3] += boundsMargin + rdrOffX;
-//            System.out.println("clip: "+java.util.Arrays.toString(_clipRect));
-
             this.clipRect = _clipRect;
         } else {
             this.clipRect = null;
