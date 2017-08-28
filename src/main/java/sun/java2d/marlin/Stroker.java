@@ -174,11 +174,11 @@ final class Stroker implements PathConsumer2D, MarlinConst {
      * @return this instance
      */
     Stroker init(final PathConsumer2D pc2d,
-              final float lineWidth,
-              final int capStyle,
-              final int joinStyle,
-              final float miterLimit,
-              final float scale)
+                 final float lineWidth,
+                 final int capStyle,
+                 final int joinStyle,
+                 final float miterLimit,
+                 final float scale)
     {
         this.out = pc2d;
 

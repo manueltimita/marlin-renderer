@@ -319,10 +319,10 @@ final class Dasher implements PathConsumer2D, MarlinConst {
         if (len == 0.0f) {
             return;
         }
-
-        // The scaling factors [0..1] needed to get the dx and dy of the
-        // transformed dash segments.
         len = (float) Math.sqrt(len);
+
+        // The scaling factors needed to get the dx and dy of the
+        // transformed dash segments.
         final float cx = dx / len;
         final float cy = dy / len;
 

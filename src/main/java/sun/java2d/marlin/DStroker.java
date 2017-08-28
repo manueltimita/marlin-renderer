@@ -172,11 +172,11 @@ final class DStroker implements DPathConsumer2D, MarlinConst {
      * @return this instance
      */
     DStroker init(final DPathConsumer2D pc2d,
-              final double lineWidth,
-              final int capStyle,
-              final int joinStyle,
-              final double miterLimit,
-              final double scale)
+                  final double lineWidth,
+                  final int capStyle,
+                  final int joinStyle,
+                  final double miterLimit,
+                  final double scale)
     {
         this.out = pc2d;
 
@@ -194,20 +194,17 @@ final class DStroker implements DPathConsumer2D, MarlinConst {
 
         if (rdrCtx.doClip) {
             // Adjust the clipping rectangle with the stroker margin (miter limit, width)
-
-            // for square caps:
-            final double widthLimit = (capStyle == CAP_SQUARE) ? SQRT_2 * lineWidth2 : lineWidth2;
-
-            double boundsMargin;
-            if (joinStyle == JOIN_MITER) {
-                boundsMargin = Math.max(widthLimit, limit);
-            } else {
-                boundsMargin = widthLimit;
-            }
             double rdrOffX = 0.0d, rdrOffY = 0.0d;
+            double margin = lineWidth2;
 
+            if (capStyle == CAP_SQUARE) {
+                margin *= SQRT_2;
+            }
+            if ((joinStyle == JOIN_MITER) && (margin < limit)) {
+                margin = limit;
+            }
             if (scale != 1.0d) {
-                boundsMargin *= scale;
+                margin *= scale;
                 rdrOffX = scale * DRenderer.RDR_OFFSET_X;
                 rdrOffY = scale * DRenderer.RDR_OFFSET_Y;
             }
@@ -215,10 +212,10 @@ final class DStroker implements DPathConsumer2D, MarlinConst {
             // bounds as half-open intervals: minX <= x < maxX and minY <= y < maxY
             // adjust clip rectangle (ymin, ymax, xmin, xmax):
             final double[] _clipRect = rdrCtx.clipRect;
-            _clipRect[0] -= boundsMargin - rdrOffY;
-            _clipRect[1] += boundsMargin + rdrOffY;
-            _clipRect[2] -= boundsMargin - rdrOffX;
-            _clipRect[3] += boundsMargin + rdrOffX;
+            _clipRect[0] -= margin - rdrOffY;
+            _clipRect[1] += margin + rdrOffY;
+            _clipRect[2] -= margin - rdrOffX;
+            _clipRect[3] += margin + rdrOffX;
             this.clipRect = _clipRect;
         } else {
             this.clipRect = null;

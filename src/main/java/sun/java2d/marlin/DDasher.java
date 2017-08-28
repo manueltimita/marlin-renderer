@@ -137,7 +137,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
                     dashOn = !dashOn;
                 }
             }
-        } else if (phase > 0) {
+        } else if (phase > 0.0d) {
             if (cycles >= MAX_CYCLES) {
                 phase = 0.0d;
             } else {
@@ -312,10 +312,10 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         if (len == 0.0d) {
             return;
         }
-
-        // The scaling factors [0..1] needed to get the dx and dy of the
-        // transformed dash segments.
         len = Math.sqrt(len);
+
+        // The scaling factors needed to get the dx and dy of the
+        // transformed dash segments.
         final double cx = dx / len;
         final double cy = dy / len;
 
@@ -357,20 +357,14 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
                 return;
             }
 
-            // TODO: out of loop if nb(seg) >> dashLen
-            // may avoid multiply by precomputation
             dashdx = d * cx;
             dashdy = d * cy;
 
             if (_phase == 0.0d) {
-                // most probable case (99%)
                 _curCurvepts[0] = x0 + dashdx;
                 _curCurvepts[1] = y0 + dashdy;
             } else {
-                // may avoid divide by precomputation
-                // TODO: out of loop if nb(seg) >> dashLen
                 p = leftInThisDashSegment / d;
-
                 _curCurvepts[0] = x0 + p * dashdx;
                 _curCurvepts[1] = y0 + p * dashdy;
             }
@@ -378,7 +372,6 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             goTo(_curCurvepts, 0, 4, _dashOn);
 
             len -= leftInThisDashSegment;
-
             // Advance to next dash segment
             _idx = (_idx + 1) % _dashLen;
             _dashOn = !_dashOn;
@@ -734,8 +727,8 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             }
 
             final double lineLen = DHelpers.linelen(curve[0], curve[1],
-                                                  curve[_curveType-2],
-                                                  curve[_curveType-1]);
+                                                    curve[_curveType-2],
+                                                    curve[_curveType-1]);
             if ((polyLen - lineLen) < ERR || recLevel == REC_LIMIT) {
                 return (polyLen + lineLen) / 2.0d;
             }
