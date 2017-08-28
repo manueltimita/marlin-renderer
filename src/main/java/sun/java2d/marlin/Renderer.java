@@ -704,7 +704,7 @@ if (USE_NAIVE_SUM) {
     }
 
     @Override
-    public void moveTo(float pix_x0, float pix_y0) {
+    public void moveTo(final float pix_x0, final float pix_y0) {
         closePath();
         final float sx = tosubpixx(pix_x0);
         final float sy = tosubpixy(pix_y0);
@@ -715,7 +715,7 @@ if (USE_NAIVE_SUM) {
     }
 
     @Override
-    public void lineTo(float pix_x1, float pix_y1) {
+    public void lineTo(final float pix_x1, final float pix_y1) {
         final float x1 = tosubpixx(pix_x1);
         final float y1 = tosubpixy(pix_y1);
         addLine(x0, y0, x1, y1);
@@ -724,9 +724,9 @@ if (USE_NAIVE_SUM) {
     }
 
     @Override
-    public void curveTo(float pix_x1, float pix_y1,
-                        float pix_x2, float pix_y2,
-                        float pix_x3, float pix_y3)
+    public void curveTo(final float pix_x1, final float pix_y1,
+                        final float pix_x2, final float pix_y2,
+                        final float pix_x3, final float pix_y3)
     {
         final float xe = tosubpixx(pix_x3);
         final float ye = tosubpixy(pix_y3);
@@ -738,8 +738,8 @@ if (USE_NAIVE_SUM) {
     }
 
     @Override
-    public void quadTo(float pix_x1, float pix_y1,
-                       float pix_x2, float pix_y2)
+    public void quadTo(final float pix_x1, final float pix_y1,
+                       final float pix_x2, final float pix_y2)
     {
         final float xe = tosubpixx(pix_x2);
         final float ye = tosubpixy(pix_y2);

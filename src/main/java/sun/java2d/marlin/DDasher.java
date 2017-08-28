@@ -157,12 +157,13 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
 
         this.dash = dash;
         this.dashLen = dashLen;
-        this.startPhase = this.phase = phase;
+        this.phase = phase;
+        this.startPhase = phase;
         this.startDashOn = dashOn;
         this.startIdx = sidx;
         this.starting = true;
-        needsMoveTo = false;
-        firstSegidx = 0;
+        this.needsMoveTo = false;
+        this.firstSegidx = 0;
 
         this.recycleDashes = recycleDashes;
 
@@ -201,7 +202,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     }
 
     @Override
-    public void moveTo(double x0, double y0) {
+    public void moveTo(final double x0, final double y0) {
         if (firstSegidx != 0) {
             out.moveTo(sx, sy);
             emitFirstSegments();
@@ -210,8 +211,10 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
         this.idx = startIdx;
         this.dashOn = this.startDashOn;
         this.phase = this.startPhase;
-        this.sx = this.x0 = x0;
-        this.sy = this.y0 = y0;
+        this.sx = x0;
+        this.sy = y0;
+        this.x0 = x0;
+        this.y0 = y0;
         this.starting = true;
     }
 
@@ -236,7 +239,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     private void emitFirstSegments() {
         final double[] fSegBuf = firstSegmentsBuffer;
 
-        for (int i = 0; i < firstSegidx; ) {
+        for (int i = 0, len = firstSegidx; i < len; ) {
             int type = (int)fSegBuf[i];
             emitSeg(fSegBuf, i + 1, type);
             i += (type - 1);
@@ -251,7 +254,9 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     private int firstSegidx;
 
     // precondition: pts must be in relative coordinates (relative to x0,y0)
-    private void goTo(double[] pts, int off, final int type, final boolean on) {
+    private void goTo(final double[] pts, final int off, final int type,
+                      final boolean on)
+    {
         final int index = off + type;
         final double x = pts[index - 4];
         final double y = pts[index - 3];
@@ -299,7 +304,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     }
 
     @Override
-    public void lineTo(double x1, double y1) {
+    public void lineTo(final double x1, final double y1) {
         final double dx = x1 - x0;
         final double dy = y1 - y0;
 
@@ -424,7 +429,7 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
             leftInThisDashSegment = _dash[_idx];
         }
 
-        goTo(_curCurvepts, curCurveoff+2, type, _dashOn);
+        goTo(_curCurvepts, curCurveoff + 2, type, _dashOn);
 
         _phase += _li.lastSegLen();
         if (_phase >= _dash[_idx]) {
@@ -739,9 +744,9 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     }
 
     @Override
-    public void curveTo(double x1, double y1,
-                        double x2, double y2,
-                        double x3, double y3)
+    public void curveTo(final double x1, final double y1,
+                        final double x2, final double y2,
+                        final double x3, final double y3)
     {
         final double[] _curCurvepts = curCurvepts;
         _curCurvepts[0] = x0;        _curCurvepts[1] = y0;
@@ -752,7 +757,9 @@ final class DDasher implements DPathConsumer2D, MarlinConst {
     }
 
     @Override
-    public void quadTo(double x1, double y1, double x2, double y2) {
+    public void quadTo(final double x1, final double y1,
+                       final double x2, final double y2)
+    {
         final double[] _curCurvepts = curCurvepts;
         _curCurvepts[0] = x0;        _curCurvepts[1] = y0;
         _curCurvepts[2] = x1;        _curCurvepts[3] = y1;
