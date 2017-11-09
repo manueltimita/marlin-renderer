@@ -116,15 +116,13 @@ public class StrokerTest {
             final String simplifier = System.getProperty("sun.java2d.renderer.useSimplifier");
 
             final File file = new File("StrokerTest-" + renderer + "_norm-subpix_cap_" + cap
-            + "_join_" + join + "_simplifier_" + simplifier + ".png");
+                    + "_join_" + join + "_simplifier_" + simplifier + ".png");
 
             System.out.println("Writing file: " + file.getAbsolutePath());;
             ImageIO.write(image, "PNG", file);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
-        }
-        finally {
+        } finally {
             g2d.dispose();
         }
     }
@@ -138,9 +136,7 @@ public class StrokerTest {
 
         final Path2D.Float path = new Path2D.Float();
 
-        int ns = 0;
-
-        for (double angle = -Math.PI / 4.0; angle <= (Math.PI * 7.0 / 4.0); angle += step, ns++) {
+        for (double angle = -Math.PI / 4.0; angle <= (Math.PI * 7.0 / 4.0); angle += step) {
             System.out.println("--------------------------------------------------");
             System.out.println("Test angle=" + angle);
 
@@ -179,9 +175,7 @@ public class StrokerTest {
             final Ellipse2D.Float ellipse = new Ellipse2D.Float();
             float px, py;
 
-            for (final PathIterator it = strokedShape.getPathIterator(null);
-            !it.isDone();
-            it.next()) {
+            for (final PathIterator it = strokedShape.getPathIterator(null); !it.isDone(); it.next()) {
                 int type = it.currentSegment(coords);
                 switch (type) {
                     case PathIterator.SEG_MOVETO:
