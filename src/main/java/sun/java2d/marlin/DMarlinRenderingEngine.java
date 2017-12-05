@@ -625,14 +625,12 @@ public final class DMarlinRenderingEngine extends RenderingEngine
     }
 
     private static void pathTo(final DRendererContext rdrCtx, final PathIterator pi,
-                               final DPathConsumer2D pc2d)
+                               DPathConsumer2D pc2d)
     {
         // mark context as DIRTY:
         rdrCtx.dirty = true;
 
-        final double[] coords = rdrCtx.double6;
-
-        pathToLoop(coords, pi, pc2d);
+        pathToLoop(rdrCtx.double6, pi, pc2d);
 
         // mark context as CLEAN:
         rdrCtx.dirty = false;
@@ -834,12 +832,10 @@ public final class DMarlinRenderingEngine extends RenderingEngine
                 final PathIterator pi = norm.getNormalizingPathIterator(rdrCtx,
                                                  s.getPathIterator(_at));
 
-                final int windingRule = pi.getWindingRule();
-
                 // note: Winding rule may be EvenOdd ONLY for fill operations !
                 r = rdrCtx.renderer.init(clip.getLoX(), clip.getLoY(),
                                          clip.getWidth(), clip.getHeight(),
-                                         windingRule);
+                                         pi.getWindingRule());
 
                 DPathConsumer2D pc2d = r;
 
@@ -1104,8 +1100,11 @@ public final class DMarlinRenderingEngine extends RenderingEngine
         // optimisation parameters
         logInfo("sun.java2d.renderer.useSimplifier    = "
                 + MarlinConst.USE_SIMPLIFIER);
+
         logInfo("sun.java2d.renderer.clip             = "
                 + MarlinProperties.isDoClip());
+        logInfo("sun.java2d.renderer.clip.runtime.enable = "
+                + MarlinProperties.isDoClipRuntimeFlag());
 
         // debugging parameters
         logInfo("sun.java2d.renderer.doStats          = "

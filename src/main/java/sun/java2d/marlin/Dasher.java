@@ -464,7 +464,7 @@ if (USE_NAIVE_SUM) {
 
     // preconditions: curCurvepts must be an array of length at least 2 * type,
     // that contains the curve we want to dash in the first type elements
-    private void somethingTo(int type) {
+    private void somethingTo(final int type) {
         if (pointCurve(curCurvepts, type)) {
             return;
         }
@@ -473,6 +473,7 @@ if (USE_NAIVE_SUM) {
         final float[] _dash = dash;
         final int _dashLen = this.dashLen;
 
+// TODO: cleanup or threshold ?
         if (true) {
             // backup (lolo):
             // optimize arraycopy (8 values faster than 6 = type):
@@ -538,7 +539,7 @@ if (USE_NAIVE_SUM) {
 
             if (true) {
                 if ((++c) == 10000) {
-                    // Split from initial curve:
+                    // Split from initial curve to correct from bias:
                     Helpers.subdivideAt(lastSplitT,
                                         initCurvepts, 0,
                                         _curCurvepts, 0,
@@ -850,7 +851,7 @@ if (USE_NAIVE_SUM) {
                 final float x1 = curve[i], y1 = curve[i+1];
                 final float len = Helpers.linelen(x0, y0, x1, y1);
                 polyLen += len;
-                curLeafCtrlPolyLengths[i/2 - 1] = len;
+                curLeafCtrlPolyLengths[(i >> 1) - 1] = len;
                 x0 = x1;
                 y0 = y1;
             }

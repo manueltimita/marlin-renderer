@@ -333,10 +333,6 @@ if (USE_NAIVE_SUM) {
             x0 = x1;
             y0 = y1;
         }
-/*
-        System.out.println("Iterations : "+n);
-        System.out.println("Errors x/y    : "+ex+" , "+ey);
-*/
         if (DO_STATS) {
             rdrCtx.stats.stat_rdr_curveBreak.add(nL);
         }
@@ -555,10 +551,10 @@ if (USE_NAIVE_SUM) {
 
     Renderer(final RendererContext rdrCtx) {
         this.rdrCtx = rdrCtx;
+        this.curve = rdrCtx.curve;
+        this.cache = rdrCtx.cache;
 
         this.edges = rdrCtx.newOffHeapArray(INITIAL_EDGES_CAPACITY); // 96K
-
-        this.curve = rdrCtx.curve;
 
         edgeBuckets_ref      = rdrCtx.newCleanIntArrayRef(INITIAL_BUCKET_ARRAY); // 64K
         edgeBucketCounts_ref = rdrCtx.newCleanIntArrayRef(INITIAL_BUCKET_ARRAY); // 64K
@@ -569,8 +565,6 @@ if (USE_NAIVE_SUM) {
         // 2048 (pixelsize) pixel large
         alphaLine_ref = rdrCtx.newCleanIntArrayRef(INITIAL_AA_ARRAY); // 8K
         alphaLine     = alphaLine_ref.initial;
-
-        this.cache = rdrCtx.cache;
 
         crossings_ref     = rdrCtx.newDirtyIntArrayRef(INITIAL_CROSSING_COUNT); // 2K
         aux_crossings_ref = rdrCtx.newDirtyIntArrayRef(INITIAL_CROSSING_COUNT); // 2K
